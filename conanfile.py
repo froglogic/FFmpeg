@@ -104,10 +104,17 @@ class FfmpegConan(conans.ConanFile):
             cmd += ' --extra-cxxflags=-m32'
             cmd += ' --extra-ldflags=-m32'
 
-        if self.settings.os == 'Macos' and arch == 'x86_64':
-            cmd += ' --extra-cflags=--target=x86_64-apple-darwin17.7.0'
-            cmd += ' --extra-cxxflags=--target=x86_64-apple-darwin17.7.0'
-            cmd += ' --extra-ldflags=--target=x86_64-apple-darwin17.7.0'
+        if self.settings.os == 'Macos':
+            if arch == 'x86_64':
+                compatFlags = '--target=x86_64-apple-darwin17.7.0 -mmacosx-version-min=10.13'
+            elif arch == 'armv8':
+                compatFlags = '--target=arm64-apple-darwin20.5.0 -mmacosx-version-min=11.0'
+            else:
+                raise Exception('Unsupported architecture: %s' % arch)
+
+            cmd += ' "--extra-cflags=%s"' % compatFlags
+            cmd += ' "--extra-cxxflags=%s"' % compatFlags
+            cmd += ' "--extra-ldflags=%s"' % compatFlags
 
         self.run(cmd)
 
